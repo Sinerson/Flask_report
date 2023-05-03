@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+    <h4>{% block title %} Добро пожаловать в Svyazist WebReports {% endblock title %}</h4>
+ {% block content %}
+    <h4>Количество отчетов в списке: {{ reports_list|length }}</h4><hr><br>
+     <h4>Выбор отчета для формирования:</h4><hr>
+    {% for item in reports_list %}
+        {% if item['DATE_REQ'] == 1 %}
+        <form action="{{ item['METHOD_NAME'] }}" method="post">
+            <tr>
+                <td align="left">{{ item['NAME'] }}</td>
+                <td align="center"><input type="date" name="nDate" /></td>
+                <td align="center"><input type="date" name="kDate" /></td>
+                <td align="center"><input type="submit" value="Выполнить" /></td>
+            </tr>
+            <tr>
+
+            </tr>
+        </form>
+        {% elif item['DATE_REQ'] == 0 %}
+        <form action="{{ item['METHOD_NAME'] }}" method="get">
+             <tr>
+                <td align="left">{{ item['NAME'] }}</td>
+                <td align="center"><input type="submit" value="Выполнить" /></td>
+             </tr>
+        </form>
+        {% endif %}
+    {% endfor %}
+{% endblock content %}

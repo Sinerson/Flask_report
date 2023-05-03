@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{# <link rel="stylesheet" href="{{ url_for('static', filename='styles.css.old') }}"> #}
+{% block content %}
+<h4>Количество столбцов(аттрибутов) в списке: {{ data[0]|length }}</h4>
+<h4>Количество элементов в списке: {{ data|length }}</h4>
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th colspan="{{ data[0]|length }}" align="center">Список пользователей телеграм бота</th>
+        </tr>
+        <tr>
+            <th scope="col">POS</th>
+            <th scope="col">USER ID</th>
+            <th scope="col">CHAT ID</th>
+            <th scope="col">PHONE NUMBER</th>
+            <th scope="col">CONTRACT CODE</th>
+            <th scope="col">PHONE USE RIGHTS</th>
+            <th scope="col">USER ADD DATE</th>
+            <th scope="col">PAYMENT NOTIFY SEND STATUS</th>
+            <th scope="col">PAYMENT NOTIFY SEND TIME</th>
+            <th scope="col">LAST PAYMENT VALUE, ₽</th>
+            <th scope="col">TECH CLAIM NUMBER</th>
+            <th scope="col">TECH CLAIM CREATE DATE</th>
+            <th scope="col">TECH CLAIM NOTIFY SEND STATUS</th>
+            <th scope="col">TECH CLAIM NOTIFY SEND TIME</th>
+        </tr>
+    </thead>
+    <tbody align="center">
+        {% for row in data %}
+            <tr>
+                <td>{{ row['idx'] }}</td>
+                <td>{{ row['user_id'] }}</td>
+                <td>{{ row['chat_id'] }}</td>
+                <td>{{ row['phonenumber'] if row['phonenumber'] }}</td>
+                <td>{{ row['contract_code'] if row['contract_code'] }}</td>
+                <td>{{ row['grant_phone'] if row['grant_phone'] }}</td>
+                <td>{{ row['date'] if row['date'] }}</td>
+                <td>{{ row['send_status'] if row['send_status'] }}</td>
+                <td>{{ row['send_time'] if row['send_time'] }}</td>
+                <td>{{ row['paid_money'] if row['paid_money'] }}</td>
+                <td>{{ row['claim'] if row['claim'] }}</td>
+                <td>{{ row['claim_send_status'] if row['claim_send_status'] }}</td>
+                <td>{{ row['claim_send_time'] if row['claim_send_time'] }}</td>
+                <td>{{ row['claim_date_create'] if row['claim_date_create'] }}</td>
+            </tr>
+        {% endfor %}
+    <hr>
+    <br>
+    </tbody>
+</table>>
+{% endblock content %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{# <link rel="stylesheet" href="{{ url_for('static', filename='styles.css.old') }}"> #}
+
+{% block content %}
+    <h3>Количество элементов в списке: {{ data|length }}</h3>
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th colspan="17" align="center">Отчет об имеющихся устройствах у абонентов</th><br>
+        </tr>
+        <tr align="center">
+            <th>POSITION</th>
+            <th>CONTRACT</th>
+            <th>FULL NAME</th>
+            <th>TOWN</th>
+            <th>STREET</th>
+            <th>HOUSE</th>
+            <th>FLAT</th>
+            <th>FLAT POSTFIX</th>
+            <th>CLIENT TYPE</th>
+            <th>PAYMENT TYPE</th>
+            <th>INTERNET</th>
+            <th>TV</th>
+            <th>TLF</th>
+            <th>VIDEO</th>
+            <th>OTT</th>
+            <th>SKPT</th>
+            <th>VATS</th>
+            <th>CONTACT PHONES</th>
+            <hr>
+            <br>
+        </tr>
+    </thead>
+    <tbody align="center">
+        {% for row in data %}
+            <tr>
+                <td>{{ row['idx'] }}</td>
+                <td>{{ row['CONTRACT'] }}</td>
+                <td>{{ row['FULL_NAME'] }}</td>
+                <td>{{ row['TOWN'] }}</td>
+                <td>{{ row['STREET'] }}</td>
+                <td>{{ row['HOUSE'] }}</td>
+                <td>{{ row['FLAT'] }}</td>
+                <td>{{ row['FLAT_POSTFIX'] }}</td>
+                <td>{{ row['CLIENT_TYPE'] }}</td>
+                <td>{{ row['PAYMENT_TYPE'] }}</td>
+                <td>{{ row['INTERNET'] if row['INTERNET'] }}</td>
+                <td>{{ row['TV'] if row['TV'] }}</td>
+                <td>{{ row['TLF'] if row['TLF'] }}</td>
+                <td>{{ row['VIDEO'] if row['VIDEO'] }}</td>
+                <td>{{ row['OTT'] if row['OTT'] }}</td>
+                <td>{{ row['SKPT'] if row['SKPT'] }}</td>
+                <td>{{ row['VATS'] if row['VATS'] }}</td>
+                <td>{{ row['CONTACT_PHONES'] if row['CONTACT_PHONES'] }}</td>
+            </tr>
+        {% endfor %}
+    <hr>
+    <br>
+    </tbody>
+</table>>
+{%  endblock %}
