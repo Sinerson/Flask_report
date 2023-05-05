@@ -12,30 +12,7 @@
 
 <h4>Количество столбцов(аттрибутов) в списке: {{ data[0]|length }}</h4>
 <h4>Количество элементов в списке: {{ data|length }}</h4>
-
-<div class="row">
-    <div class="col-sm-12 col-md-6">
-        <div class="dataTables_length" id="example_length">
-            <label>Show
-                <select name="example_length" aria-controls="example" class="form-select form-select-sm">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                </select> entries
-            </label>
-        </div>
-    </div>
-    <div class="col-sm-12 col-md-6">
-        <div id="example_filter" class="dataTables_filter">
-            <label>Search:<input type="search" class="form-control form-control-sm" placeholder="" aria-controls="example">
-            </label>
-        </div>
-    </div>
-</div>
-<div class="row dt-row">
-<div class="col-sm-12">
-<table id="example" class="table table-striped dataTable" style="width: 100%;" aria-describedby="example_info">
+<table id="reportTable" class="table table-striped dataTable" style="width: 100%;" aria-describedby="example_info">
     <thead>
         <tr align="center">
         {# Ячейки первой строки объеденим #}
@@ -81,7 +58,4 @@
         </tr>
     </tfoot>
 </table>
-</div>
-</div>
-
 {% endblock content %}

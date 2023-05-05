@@ -3,7 +3,7 @@
     <h4>{% block title %} Добро пожаловать в Svyazist WebReports {% endblock title %}</h4>
  {% block content %}
      <h4>Групп отчетов: {{ reports_group|length }}</h4>
-    <h4>Количество отчетов в группах: {{ reports_list|length }}</h4><hr><br>
+    <h4>Количество отчетов в группах: {{ reports_list|length }}</h4><hr>
      <h4>Выбор отчета для формирования:</h4><hr>
     {% for item in reports_list %}
         {% if item['DATE_REQ'] == 1 %}
