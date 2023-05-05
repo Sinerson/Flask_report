@@ -13,32 +13,59 @@
 <h4>Количество столбцов(аттрибутов) в списке: {{ data[0]|length }}</h4>
 <h4>Количество элементов в списке: {{ data|length }}</h4>
 
-
-<div class="table-responsive">
-<table class="table table-striped table-hover table-condensed table-bordered table-responsive">
+<div class="row">
+    <div class="col-sm-12 col-md-6">
+        <div class="dataTables_length" id="example_length">
+            <label>Show
+                <select name="example_length" aria-controls="example" class="form-select form-select-sm">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                </select> entries
+            </label>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-6">
+        <div id="example_filter" class="dataTables_filter">
+            <label>Search:<input type="search" class="form-control form-control-sm" placeholder="" aria-controls="example">
+            </label>
+        </div>
+    </div>
+</div>
+<div class="row dt-row">
+<div class="col-sm-12">
+<table id="example" class="table table-striped dataTable" style="width: 100%;" aria-describedby="example_info">
     <thead>
         <tr align="center">
-        {# Первую ячейку объеденим и сделаем равной по ширине всем столбцам #}
+        {# Ячейки первой строки объеденим #}
             {% if nDate or kDate %}
-            <th colspan="{{ data[0]|length }}" scope="col">Выборка данных за период c: {{ nDate }} по: {{ kDate }}</th>
+            <th colspan="{{ data[0]|length }}" scope="col" style="width: auto">
+                Выборка данных за период c: {{ nDate }} по: {{ kDate }}
+            </th>
             {% elif  not nDate or kDate %}
-            <th colspan="{{ data[0]|length }}" scope="col">Полная выборка</th>
+            <th colspan="{{ data[0]|length }}" scope="col" style="width: auto">
+                Полная выборка
+            </th>
             {% endif %}
         </tr>
-        <tr align="center">
+        <tr>
         {# Выведем наименование заголовков для таблицы, получив их из наименования ключей в первом элементе словаря #}
             {%  for row in data[0] %}
-                <th>{{ row.upper() }}</th>
+                <th class="sorting sorting_asc" aria-controls="example" colspan="1" scope="col"
+                aria-sort="ascending" aria-label="Name: activate to sort column descending" style="width: auto">
+                    {{ row.upper() }}
+                </th>
             {% endfor %}
         </tr>
     </thead>
     <tbody>
     {# Развернем словари, вложенные в список #}
     {%  for row in data %}
-    <tr align="center">
+    <tr class="odd" align="center">
         {# Для каждого ключа словаря достанем значение #}
         {% for value in row %}
-        <td>
+        <td class="sorting_1">
             {# Поместим ранее полученное значение ключа в ячейку таблицы #}
             {{ row[value] if row[value]}}
         </td>
@@ -46,7 +73,15 @@
     </tr>
     {%  endfor %}
     </tbody>
+    <tfoot>
+        <tr>
+            {%  for row in data[0] %}
+            <th>{{ row.upper() }}</th>
+            {% endfor %}
+        </tr>
+    </tfoot>
 </table>
+</div>
 </div>
 
 {% endblock content %}

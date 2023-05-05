@@ -1,3 +1,4 @@
+import datetime
 import json
 from json import *
 import werkzeug.exceptions
@@ -20,22 +21,42 @@ def get_connection():
 	cursor = connect.cursor()
 	return cursor
 
-
-def get_reports_list():
+def get_reports_group():
 	cursor = get_connection()
-	cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 0")
-	columns = [column[0] for column in cursor.description]
-	query_data = []
+	cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 1")
+	columns_name = [column[0] for column in cursor.description]
+	group_list = []
 	for row in cursor.fetchall():
-		query_data.append(dict(zip(columns,row)))
+		group_list.append(dict(zip(columns_name, row)))
 	cursor.close()
-	return query_data
+	return group_list
+
+def get_reports_list(id=None):
+	if id is None:
+		cursor = get_connection()
+		cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 0")
+		columns_name = [column[0] for column in cursor.description]
+		reports_list = []
+		for row in cursor.fetchall():
+			reports_list.append(dict(zip(columns_name, row)))
+		cursor.close()
+		return reports_list
+	else:
+		cursor = get_connection()
+		cursor.execute(f"select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 0 and PARENT_ID = {int(id)}")
+		columns_name = [column[0] for column in cursor.description]
+		reports_list = []
+		for row in cursor.fetchall():
+			reports_list.append(dict(zip(columns_name,row)))
+		cursor.close()
+		return reports_list
+
 
 @app.route('/', methods=['GET','POST'])
 def index():
-	report_list = get_reports_list()
-
-	return render_template('index.html', reports_list=report_list)
+	reports_group = get_reports_group()
+	reports_list = get_reports_list()
+	return render_template('index.html', reports_list=reports_list, reports_group = reports_group)
 
 
 @app.route('/tgusers', methods = ('GET','POST'))
@@ -96,7 +117,7 @@ def get24TvCharges():
 		nDate = request.form['nDate']
 		kDate = request.form['kDate']
 
-		cursor.execute(f"exec MEDIATE..spSvReports24HTVSubscribers {'nDate'},{'kDate'}")
+		cursor.execute(f"exec MEDIATE..spSvReports24HTVSubscribers")
 		columns = [column[0] for column in cursor.description]
 		query_data = []
 		for row in cursor.fetchall():
@@ -107,6 +128,27 @@ def get24TvCharges():
 	else:
 		abort(501)
 
+
+@app.route('/doubleconn', methods = ['POST','GET'])
+def getDoubleConnection():
+	if request.method == 'GET':
+		abort(405)
+
+	elif request.method == 'POST':
+		abonType = request.form['abType']
+		nDate = request.form['nDate']
+		kDate = request.form['kDate']
+		cursor = get_connection()
+		cursor.execute(f"SV..spSvReportsDoubleConnections_04052023 {int(abonType)},'{nDate}','{kDate}'")
+		columns = [column[0] for column in cursor.description]
+		query_data = []
+		for row in cursor.fetchall():
+			query_data.append(dict(zip(columns, row)))
+		cursor.close()
+
+		return render_template('report.html', data=query_data, reports_list=get_reports_list(), nDate = nDate, kDate=kDate)
+	else:
+		abort(501)
 
 #app.route('/getxls', meth)
 
