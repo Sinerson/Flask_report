@@ -12,16 +12,16 @@
 
 <h4>Количество столбцов(аттрибутов) в списке: {{ data[0]|length }}</h4>
 <h4>Количество элементов в списке: {{ data|length }}</h4>
-<table id="reportTable" class="table table-striped dataTable" style="width: 100%;" aria-describedby="example_info">
+<table id="reportTable" class="table-bordered table-hover table-striped dataTable table-group-divider" style="width: 100%; text-align: center">
     <thead>
-        <tr align="center">
+        <tr>
         {# Ячейки первой строки объеденим #}
             {% if nDate or kDate %}
-            <th colspan="{{ data[0]|length }}" scope="col" style="width: auto">
+            <th colspan="{{ data[0]|length }}" scope="col" style="text-align: center">
                 Выборка данных за период c: {{ nDate }} по: {{ kDate }}
             </th>
             {% elif  not nDate or kDate %}
-            <th colspan="{{ data[0]|length }}" scope="col" style="width: auto">
+            <th colspan="{{ data[0]|length }}" scope="col" style="width: auto; text-align: center">
                 Полная выборка
             </th>
             {% endif %}
@@ -29,8 +29,7 @@
         <tr>
         {# Выведем наименование заголовков для таблицы, получив их из наименования ключей в первом элементе словаря #}
             {%  for row in data[0] %}
-                <th class="sorting sorting_asc" aria-controls="example" colspan="1" scope="col"
-                aria-sort="ascending" aria-label="Name: activate to sort column descending" style="width: auto">
+                <th style="text-align: center">
                     {{ row.upper() }}
                 </th>
             {% endfor %}
@@ -39,10 +38,10 @@
     <tbody>
     {# Развернем словари, вложенные в список #}
     {%  for row in data %}
-    <tr class="odd" align="center">
+    <tr style="text-align: center">
         {# Для каждого ключа словаря достанем значение #}
         {% for value in row %}
-        <td class="sorting_1">
+        <td style="text-align: center">
             {# Поместим ранее полученное значение ключа в ячейку таблицы #}
             {{ row[value] if row[value]}}
         </td>
@@ -51,9 +50,11 @@
     {%  endfor %}
     </tbody>
     <tfoot>
-        <tr>
+        <tr style="text-align: center">
             {%  for row in data[0] %}
-            <th>{{ row.upper() }}</th>
+            <th style="text-align: center">
+                {{ row.upper() }}
+            </th>
             {% endfor %}
         </tr>
     </tfoot>

@@ -2,38 +2,43 @@
 
     <h4>{% block title %} Добро пожаловать в Svyazist WebReports {% endblock title %}</h4>
  {% block content %}
-     <h4>Групп отчетов: {{ reports_group|length }}</h4>
+    <div class="container text-left">
+    <h4>Групп отчетов: {{ reports_group|length }}</h4>
     <h4>Количество отчетов в группах: {{ reports_list|length }}</h4><hr>
-     <h4>Выбор отчета для формирования:</h4><hr>
+    <h4>Выбор отчета для формирования:</h4><hr>
+    </div>
+    <div class="container text-center">
     {% for item in reports_list %}
         {% if item['DATE_REQ'] == 1 %}
-        <form action="{{ item['METHOD_NAME'] }}" method="post">
-            <fieldset>
-                <legend>{{ item['NAME'] }}</legend>
+        <div class="container-fluid row" style="width: auto; text-align: left">
+            <div class="col" style="width: auto;">
+                <h6>{{ item['NAME'] }}</h6>
+            </div>
+            <div class="col" style="width: auto; text-align: end">
+                <form action="{{ item['METHOD_NAME'] }}" method="post">
                 <select name="abType" id="abTypeList">
-                    <option value = "">>------Тип абонента ------<</option>
-                    <option value = "1">Юр.лица</option>
-                    <option value = "0">Физ.лица</option>
+                    <option value="0">Выбор типа абонента...</option>
+                    <option value = "1">По юр.лицам</option>
+                    <option value = "0">По физ.лицам</option>
                 </select>
-                {# <td align="center"><input type="number" name="abType" list="abTypeList" /></td> #}
-                <tr>
-                    {# <td align="left">{{ item['NAME'] }}</td> #}
-                    <td align="center"><input type="date" name="nDate" /></td>
-                    <td align="center"><input type="date" name="kDate" /></td>
-                    <td align="center"><input type="submit" value="Выполнить" /></td>
-                </tr>
-            </fieldset>
-        </form>
+                <input type="date" name="nDate" value="01-01-2023"/>
+                <input type="date" name="kDate" value="31-12-2023"/>
+                <input type="submit" value="Выполнить" />
+                </form>
+            </div>
+        </div>
         {% elif item['DATE_REQ'] == 0 %}
-        <form action="{{ item['METHOD_NAME'] }}" method="get">
-            <legend>{{ item['NAME'] }}</legend>
-                <fieldset>
-                    <tr>
-                        {# <td align="left">{{ item['NAME'] }}</td> #}
-                        <td align="center"><input type="submit" value="Выполнить" /></td>
-                    </tr>
-                </fieldset>
-        </form>
+        <div class="container-fluid row" style="width: auto; text-align: left">
+            <div class="col">
+                <h6>{{ item['NAME'] }}</h6>
+            </div>
+            <div class="col" style="width: auto; text-align: end">
+                <form action="{{ item['METHOD_NAME'] }}" method="get">
+                <input type="submit" value="Выполнить" />
+                </form>
+            </div>
+        </div>
         {% endif %}
     {% endfor %}
+    </div>
 {% endblock content %}
