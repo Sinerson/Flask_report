@@ -20,28 +20,50 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename= 'css/styles.css') }}">
 
         <script>
             {# После полной загрузки структуры DOM выполняет преобразование данных в таблице с id: reportTable в DataTable методом из jQuery #}
             $(document).ready(
                 function() {
-                    {# "order": [] отключает сортировку по-умолчанию, т.к. это ломает внешний вид некоторых отчетов #}
+                    {#
+                    paging: false - отключить вывод пагинации
+                    ordering: false - отключить возможность сортировки
+                    info: false - отключить вывод информации о таблице
+                     #}
                     $('#reportTable').DataTable(
-                        {
-                            "order": [],
-                            dom: 'Bfrtip',
-                            buttons:    [
-                                        'copy', 'csv', 'excel',
-                                        {
-                                            extend: 'pdfHtml5',
-                                            orientation: 'landscape',
-                                            pageSize: 'A4'
-                                        },
-                                        'print'
-                                        ]
-                        }
+                                {
+                                    "processing": true, {# Отображает текст, указанный в одноименном параметре секиции language, это касается только загруженных на клиент данных #}
+                                    ordering: true, {# функционал сортировки в столбцах таблицы true|false #}
+                                    searching: true, {# строка поиска true|false + параметр с текстом из language #}
+                                    responsive: true,
+                                    "serverSide": false,
+                                    "autoWidth": true, {# автоподбор ширины столбцов для того чтобы уместиться на экране #}
+                                    bLengthChange: true,
+                                    language: {
+                                        url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/ru.json",
+                                        decimal: ',',
+                                        thousands: '.',
+                                    },
+                                    "order": [], {# отключает сортировку по умолчанию для столбцов  т.к. это ломает внешний вид некоторых отчетов #}
+                                    dom: 'Bfrtip',
+                                    buttons:    [
+                                                'copy', 'csv', 'excel',
+                                                {
+                                                    extend: 'pdfHtml5',
+                                                    orientation: 'landscape',
+                                                    pageSize: 'A3'
+                                                },
+                                                'print', 'pageLength'
+                                                ],
+
+                                    lengthMenu: [
+                                        [10,25,50,100,250,500,-1],
+                                        [10,25,50,100,250,500,'Все'],
+                                    ],
+                                }
                                                 );
-                           } );
+                    } );
         </script>
 
         <title>
@@ -80,6 +102,13 @@
           <a class="nav-link disabled">Отключенная</a>
         </li>
       </ul>
+    <li class="nav-item">
+        {% for item in user_info %}
+        <a class="nav-list disabled">
+            {{ item['FULL_NAME'] }}
+        </a>
+        {% endfor %}
+    </li>
     {#
       <form class="d-flex" role="search">
          <input class="form-control form-control-sm" type="search" aria-label="Поиск" placeholder="Поиск" aria-controls="reportTable">

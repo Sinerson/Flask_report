@@ -1,9 +1,11 @@
 import datetime
+from datetime import datetime
 import json
 from json import *
 import werkzeug.exceptions
 from flask import Flask, render_template, request, url_for, redirect, flash, message_flashed
 from werkzeug.exceptions import abort
+from werkzeug.security import generate_password_hash, check_password_hash
 import pyodbc
 import pandas as pd
 import openpyxl
@@ -21,42 +23,75 @@ def get_connection():
 	cursor = connect.cursor()
 	return cursor
 
-def get_reports_group():
-	cursor = get_connection()
-	cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 1")
-	columns_name = [column[0] for column in cursor.description]
-	group_list = []
-	for row in cursor.fetchall():
-		group_list.append(dict(zip(columns_name, row)))
-	cursor.close()
-	return group_list
-
-def get_reports_list(id=None):
-	if id is None:
+class Reports():
+	def getGroup():
 		cursor = get_connection()
-		cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 0")
+		cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 1")
 		columns_name = [column[0] for column in cursor.description]
-		reports_list = []
+		group_list = []
 		for row in cursor.fetchall():
-			reports_list.append(dict(zip(columns_name, row)))
+			group_list.append(dict(zip(columns_name, row)))
 		cursor.close()
-		return reports_list
-	else:
-		cursor = get_connection()
-		cursor.execute(f"select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 0 and PARENT_ID = {int(id)}")
-		columns_name = [column[0] for column in cursor.description]
-		reports_list = []
-		for row in cursor.fetchall():
-			reports_list.append(dict(zip(columns_name,row)))
-		cursor.close()
-		return reports_list
+		return group_list
 
+	def getList(id=None):
+		if id is None:
+			cursor = get_connection()
+			cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 0")
+			columns_name = [column[0] for column in cursor.description]
+			reports_list = []
+			for row in cursor.fetchall():
+				reports_list.append(dict(zip(columns_name, row)))
+			cursor.close()
+			return reports_list
+		else:
+			cursor = get_connection()
+			cursor.execute(f"select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 0 and PARENT_ID = {int(id)}")
+			columns_name = [column[0] for column in cursor.description]
+			reports_list = []
+			for row in cursor.fetchall():
+				reports_list.append(dict(zip(columns_name,row)))
+			cursor.close()
+			return reports_list
+
+class User():
+	def getUser(username, password):
+		if username and password is not None:
+			cursor = get_connection()
+			cursor.execute(f"select USER_CODE,rtrim(USER_NAME) as USER_NAME,rtrim(USER_PASSWORD) as USER_PASSWORD,"
+			               f"rtrim(USER_STATUS) as USER_STATUS,rtrim(FULL_NAME) as FULL_NAME, GROUP_CODE "
+			               f"from INTEGRAL..USERS "
+			               f"where USER_ACTIVE = '1' and USER_NAME = '{username}' and USER_PASSWORD = '{password}'")
+			columns_name = [column[0] for column in cursor.description]
+			user = []
+			for row in cursor.fetchall():
+				user.append(dict(zip(columns_name, row)))
+			cursor.close()
+			return user
+		else:
+			return None
 
 @app.route('/', methods=['GET','POST'])
+def form_authorization():
+	if request.method == 'POST':
+		Login = request.form.get('Login')
+		Password = request.form.get('Password')
+		result = User.getUser(Login,Password)
+		if not result:
+			return render_template('auth_bad.html')
+		else:
+			return redirect('/index')
+
+	if request.method == 'GET':
+		return render_template('auth.html')
+
+
+@app.route('/index', methods=['GET','POST'])
 def index():
-	reports_group = get_reports_group()
-	reports_list = get_reports_list()
-	return render_template('index.html', reports_list=reports_list, reports_group = reports_group)
+	reports_group = Reports.getGroup()
+	reports_list = Reports.getList()
+	user_info = [{'USER_CODE': 173, 'USER_NAME': 'tabolin_bp', 'USER_PASSWORD': 'j3qq4h7h2v7gkjk', 'USER_STATUS': 'А', 'FULL_NAME': 'Таболин Б.П.', 'GROUP_CODE': 188}]
+	return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = user_info)
 
 
 @app.route('/tgusers', methods = ('GET','POST'))
@@ -71,7 +106,7 @@ def getTelegramUsers():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data = query_data, reports_list = get_reports_list())#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
+		return render_template('report.html', data = query_data, reports_list = Reports.getList())#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
 	elif request.method == 'POST':
 		nDate = request.form['nDate']
 		kDate = request.form['kDate']
@@ -81,7 +116,7 @@ def getTelegramUsers():
 		for row in cursor.fetchall():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
-		return render_template('report.html', data=query_data, reports_list=get_reports_list())
+		return render_template('report.html', data=query_data, reports_list=Reports.getList())
 	else:
 		abort(501)
 
@@ -96,7 +131,7 @@ def getDevicesByAddressList():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data = query_data, reports_list = get_reports_list())#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
+		return render_template('report.html', data = query_data, reports_list = Reports.getList())#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
 	else:
 		abort(501)
 
@@ -112,7 +147,7 @@ def get24TvCharges():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data = query_data, reports_list = get_reports_list())
+		return render_template('report.html', data = query_data, reports_list = Reports.getList())
 	elif request.method == 'POST':
 		nDate = request.form['nDate']
 		kDate = request.form['kDate']
@@ -124,7 +159,7 @@ def get24TvCharges():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data=query_data, reports_list=get_reports_list(), nDate = nDate, kDate=kDate)
+		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate)
 	else:
 		abort(501)
 
@@ -146,11 +181,9 @@ def getDoubleConnection():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data=query_data, reports_list=get_reports_list(), nDate = nDate, kDate=kDate)
+		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate)
 	else:
 		abort(501)
-
-#app.route('/getxls', meth)
 
 if __name__ == '__main__':
 	run()
