@@ -26,7 +26,19 @@ def get_connection():
 	cursor = connect.cursor()
 	return cursor
 
-class Reports():
+class Reports(object):
+	def __init__(self):
+		self.id = None
+		self.parent_id = None
+		self.name = None
+		self.visible = None
+		self.date_add = None
+		self.exec_type = None
+		self.exec_path = None
+		self.method_name = None
+		self.is_group = None
+		self.date_req = None
+
 	def getGroup():
 		cursor = get_connection()
 		cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 1")
@@ -71,15 +83,17 @@ class Reports():
 		return send_file(output,download_name="testing.xlsx",as_attachment=True)
 
 
-class User():
+class User(object):
+
 	def getUser(username, password):
 		if username and password is not None:
 			cursor = get_connection()
 			cursor.execute(f"select USER_CODE,rtrim(USER_NAME) as USER_NAME,rtrim(USER_PASSWORD) as USER_PASSWORD,"
-			               f"rtrim(USER_STATUS) as USER_STATUS,rtrim(FULL_NAME) as FULL_NAME, GROUP_CODE "
+			               f"rtrim(USER_STATUS) as USER_STATUS,rtrim(FULL_NAME) as FULL_NAME, GROUP_CODE, USER_ACTIVE "
 			               f"from INTEGRAL..USERS "
 			               f"where USER_ACTIVE = '1' and USER_NAME = '{username}' and USER_PASSWORD = '{password}'")
 			columns_name = [column[0] for column in cursor.description]
+			global user
 			user = []
 			for row in cursor.fetchall():
 				user.append(dict(zip(columns_name, row)))
@@ -87,6 +101,7 @@ class User():
 			return user
 		else:
 			return None
+
 	def login(Login, Password=None):
 		if request.method == 'POST':
 			session.permanent = True
@@ -95,12 +110,13 @@ class User():
 				session['logged_in'] = True
 				session['Login'] = Login
 			else:
-				user_info = User.getUser(Login, Password)
+				#user_info = User.getUser(Login, Password)
 				session['logged_in'] = True
 				session['Login'] = Login
-				for item in user_info:
+				for item in user:#user_info:
 					session['FullName'] = item['FULL_NAME']
 			return True
+
 	def logout(self):
 		session.pop('logged_in', False)
 		session.clear()
@@ -134,7 +150,6 @@ def index():
 	if session.get('logged_in') == True:
 		reports_group = Reports.getGroup()
 		reports_list = Reports.getList()
-		Reports.makeExcel()
 		return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = session.get('FullName'))
 	else:
 		return redirect('/')
@@ -159,7 +174,7 @@ def getTelegramUsers():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data = query_data, reports_list = Reports.getList())#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
+		return render_template('report.html', data = query_data, reports_list = Reports.getList(), user_info = session.get('FullName'))#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
 	elif request.method == 'POST':
 		nDate = request.form['nDate']
 		kDate = request.form['kDate']
@@ -184,7 +199,7 @@ def getDevicesByAddressList():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data = query_data, reports_list = Reports.getList())#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
+		return render_template('report.html', data = query_data, reports_list = Reports.getList(), user_info = session.get('FullName'))#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
 	else:
 		abort(501)
 
@@ -212,7 +227,7 @@ def get24TvCharges():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate)
+		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate, user_info = session.get('FullName'))
 	else:
 		abort(501)
 
@@ -234,7 +249,7 @@ def getDoubleConnection():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate)
+		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate, user_info = session.get('FullName'))
 	else:
 		abort(501)
 
