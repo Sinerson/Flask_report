@@ -1,9 +1,9 @@
-import datetime
+import datetime, os
 from datetime import datetime
 import json
 from json import *
 import werkzeug.exceptions
-from flask import Flask, render_template, request, url_for, redirect, flash, message_flashed
+from flask import Flask, render_template, request, url_for, redirect, flash, make_response, session, g
 from werkzeug.exceptions import abort
 from werkzeug.security import generate_password_hash, check_password_hash
 import pyodbc
@@ -55,6 +55,7 @@ class Reports():
 			return reports_list
 
 class User():
+
 	def getUser(username, password):
 		if username and password is not None:
 			cursor = get_connection()
@@ -70,28 +71,55 @@ class User():
 			return user
 		else:
 			return None
+	def login(Login):
+		if request.method == 'POST':
+			session['logged_in'] = True
+			session['Login'] = Login
+			return True
+	def logout(self):
+		session.pop('logged_in', False)
+		session.clear()
+		return redirect('/')
+
 
 @app.route('/', methods=['GET','POST'])
 def form_authorization():
-	if request.method == 'POST':
+	if session.get('logged_in') == True:
+		return redirect('/index')
+	elif request.method == 'POST':
 		Login = request.form.get('Login')
 		Password = request.form.get('Password')
-		result = User.getUser(Login,Password)
-		if not result:
+		psw_hash = generate_password_hash(Password)
+		user = User.getUser(Login,Password)
+		if not user:
 			return render_template('auth_bad.html')
 		else:
-			return redirect('/index')
-
-	if request.method == 'GET':
+			for item in user:
+				if item['USER_NAME'] == Login and check_password_hash(psw_hash, item['USER_PASSWORD']) is True or g.user is not None:
+					User.login(Login)
+					return redirect('/index')
+				else:
+					return render_template('auth_bad.html')
+	elif request.method == 'GET':
 		return render_template('auth.html')
 
 
 @app.route('/index', methods=['GET','POST'])
 def index():
-	reports_group = Reports.getGroup()
-	reports_list = Reports.getList()
-	user_info = [{'USER_CODE': 173, 'USER_NAME': 'tabolin_bp', 'USER_PASSWORD': 'j3qq4h7h2v7gkjk', 'USER_STATUS': 'А', 'FULL_NAME': 'Таболин Б.П.', 'GROUP_CODE': 188}]
-	return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = user_info)
+	if session.get('logged_in') == True:
+		reports_group = Reports.getGroup()
+		reports_list = Reports.getList()
+		user_info = [{'USER_CODE': 173, 'USER_NAME': 'tabolin_bp', 'USER_PASSWORD': 'j3qq4h7h2v7gkjk', 'USER_STATUS': 'А', 'FULL_NAME': 'Таболин Б.П.', 'GROUP_CODE': 188}]
+		return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = user_info)
+	else:
+		return redirect('/')
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+	name = session.get('Login')
+	User.logout(session.get('Login'))
+	return render_template('logout.html', name=name)
 
 
 @app.route('/tgusers', methods = ('GET','POST'))

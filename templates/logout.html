@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="Refresh" content="10;/">
+        <title>Sv Web Reports</title>
+    </head>
+<body>
+<form>
+  <div class="container">
+    <label><b>Пользователь {{ name }}, вы успешно вышли из системы</b></label>
+  </div>
+  <div class="container">
+    <span class="reg"> <a href="/">Вернуться на главную страницу</a></span>
+  </div>
+</form>
+
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/auth_bad.css') }}">
+</body>
+</html>
