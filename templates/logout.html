@@ -10,7 +10,11 @@
 <body>
 <form>
   <div class="container">
-    <label><b>Пользователь {{ name }}, вы успешно вышли из системы</b></label>
+    <label><b>{{ name }}, вы успешно вышли из системы</b></label><br>
+    <label>
+        <b>Переход на главную страницу<br>
+            <progress value="0" max="10" id="progressBar"></progress>
+        </b></label>
   </div>
   <div class="container">
     <span class="reg"> <a href="/">Вернуться на главную страницу</a></span>
@@ -18,5 +22,7 @@
 </form>
 
 <link rel="stylesheet" href="{{ url_for('static', filename= 'css/auth_bad.css') }}">
+<script src="{{ url_for('static', filename= 'js/progressbar.js') }}">
+</script>
 </body>
 </html>

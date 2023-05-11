@@ -41,7 +41,8 @@
                                     "autoWidth": true, {# автоподбор ширины столбцов для того чтобы уместиться на экране #}
                                     bLengthChange: true,
                                     language: {
-                                        url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/ru.json",
+                                        {# url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/ru.json", #}
+                                        url: "{{ url_for('static', filename='ru.json') }}",
                                         decimal: ',',
                                         thousands: '.',
                                     },
@@ -102,16 +103,22 @@
           <a class="nav-link disabled">Отключенная</a>
         </li>
       </ul>
-    <li class="nav-item dropdown">
-        {% for item in user_info %}
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ item['FULL_NAME'] }}
-        </a>
-        {% endfor %}
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="/logout">Выйти</a> </li>
+        <ul class="nav-item dropdown nav-item navbar-nav me-auto mb-1 mb-lg-0">
+            {% if not user_info %}
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Выход из системы
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="/logout">Выйти</a>
+                </ul>
+            {% else %}
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user_info }}</a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="/logout">Выйти</a>
+                </ul>
+            {% endif %}
         </ul>
-    </li>
+
     {#
       <form class="d-flex" role="search">
          <input class="form-control form-control-sm" type="search" aria-label="Поиск" placeholder="Поиск" aria-controls="reportTable">

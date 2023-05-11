@@ -1,14 +1,17 @@
 import datetime, os
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from json import *
 import werkzeug.exceptions
-from flask import Flask, render_template, request, url_for, redirect, flash, make_response, session, g
+from flask import Flask, render_template, request, url_for, redirect, flash, make_response, session, g, send_file
 from werkzeug.exceptions import abort
 from werkzeug.security import generate_password_hash, check_password_hash
 import pyodbc
 import pandas as pd
+import numpy as np
 import openpyxl
+import xlsxwriter
+from io import BytesIO
 from config import DRIVER, SERVER, PORT, USER, PASSW, LANGUAGE, CLIENT_HOST_NAME, CLIENT_HOST_PROC, APPLICATION_NAME, SECRET_KEY
 
 
@@ -53,9 +56,22 @@ class Reports():
 				reports_list.append(dict(zip(columns_name,row)))
 			cursor.close()
 			return reports_list
+	def makeExcel():
+		df_1 = pd.DataFrame(np.random.randint(0,10,size=(10,4)), columns=list('ABCD'))
+		output = BytesIO()
+		writer = pd.ExcelWriter(output, engine='xlsxwriter')
+		df_1.to_excel(writer,startrow=0, merge_cells=False, sheet_name='Sheet_1')
+		workbook = writer.book
+		worksheet = writer.sheets["Sheet_1"]
+		format = workbook.add_format()
+		format.set_bg_color('#eeeeee')
+		worksheet.set_column(0,9,28)
+		writer.close()
+		output.seek(0)
+		return send_file(output,download_name="testing.xlsx",as_attachment=True)
+
 
 class User():
-
 	def getUser(username, password):
 		if username and password is not None:
 			cursor = get_connection()
@@ -71,10 +87,19 @@ class User():
 			return user
 		else:
 			return None
-	def login(Login):
+	def login(Login, Password=None):
 		if request.method == 'POST':
-			session['logged_in'] = True
-			session['Login'] = Login
+			session.permanent = True
+			app.permanent_session_lifetime = timedelta(hours=8)
+			if not Password:
+				session['logged_in'] = True
+				session['Login'] = Login
+			else:
+				user_info = User.getUser(Login, Password)
+				session['logged_in'] = True
+				session['Login'] = Login
+				for item in user_info:
+					session['FullName'] = item['FULL_NAME']
 			return True
 	def logout(self):
 		session.pop('logged_in', False)
@@ -94,9 +119,9 @@ def form_authorization():
 		if not user:
 			return render_template('auth_bad.html')
 		else:
+			User.login(Login, Password)
 			for item in user:
 				if item['USER_NAME'] == Login and check_password_hash(psw_hash, item['USER_PASSWORD']) is True or g.user is not None:
-					User.login(Login)
 					return redirect('/index')
 				else:
 					return render_template('auth_bad.html')
@@ -109,17 +134,17 @@ def index():
 	if session.get('logged_in') == True:
 		reports_group = Reports.getGroup()
 		reports_list = Reports.getList()
-		user_info = [{'USER_CODE': 173, 'USER_NAME': 'tabolin_bp', 'USER_PASSWORD': 'j3qq4h7h2v7gkjk', 'USER_STATUS': 'А', 'FULL_NAME': 'Таболин Б.П.', 'GROUP_CODE': 188}]
-		return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = user_info)
+		Reports.makeExcel()
+		return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = session.get('FullName'))
 	else:
 		return redirect('/')
 
 
 @app.route('/logout', methods=['GET'])
 def logout():
-	name = session.get('Login')
+	FullName = session.get('FullName')
 	User.logout(session.get('Login'))
-	return render_template('logout.html', name=name)
+	return render_template('logout.html', name=FullName)
 
 
 @app.route('/tgusers', methods = ('GET','POST'))
