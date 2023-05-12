@@ -1,4 +1,84 @@
 {% extends 'base.html' %}
 <h4>{% block title %} Svyazist WebReports. Управление отчетами. {% endblock title %}</h4>
 {% block content %}
+<div class="container text-center">
+<br>
+    <div class="container-fluid row" style="width: auto; text-align: center">
+        <h4>
+            <b>
+                Добавление нового отчета в базу
+            </b>
+        </h4>
+    </div>
+<hr>
+<form method="POST">
+  <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+        <label for="ParentId"><b>ID группы отчетов</b></label>
+      </div>
+      <div class="col" style="width: auto; text-align: center">
+        <input type="number" placeholder="" name="ParentId" required><br>
+      </div>
+  </div>
+  <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+            <label for="ReportName"><b>Наименование отчета</b></label>
+      </div>
+      <div class="col" style="width: auto; text-align: center">
+          <input type="text" placeholder="" name="ReportName" required><br>
+      </div>
+  </div>
+  <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+          <label for="Visible"><b>Видимость</b></label>
+      </div>
+      <div class="col" style="width: auto; text-align: center">
+          <p>
+          <input type="radio" placeholder="" name="Visible" value="1" required>Вкл.
+          <input type="radio" placeholder="" name="Visible" value="0" required>Выкл.
+          </p>
+      </div>
+  </div>
+  <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+          <label for="ExecType"><b>Тип вызова</b></label>
+      </div>
+      <div class="col" style="width: auto; text-align: center">
+          <input type="text" placeholder="" name="ExecType" required><br>
+      </div>
+  </div>
+   <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+          <label for="ExecPath"><b>Адрес вызова</b></label>
+      </div>
+       <div class="col" style="width: auto; text-align: center">
+           <input type="text" placeholder="" name="ExecPath" required><br>
+       </div>
+   </div>
+    <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+          <label for="MethodName"><b>Имя метода</b></label>
+      </div>
+      <div class="col" style="width: auto; text-align: center">
+           <input type="text" placeholder="" name="MethodName" required><br>
+      </div>
+    </div>
+    <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+          <label for="DateReq"><b>Доп.параметры</b></label>
+    </div>
+      <div class="col" style="width: auto; text-align: center">
+          <p>
+          <input type="radio" placeholder="" name="DateReq" value="1" required>Есть
+          <input type="radio" placeholder="" name="DateReq" value="0" required>Нет
+          </p>
+      </div>
+    </div>
+    <div class="container-fluid row" style="width: auto; text-align: center">
+      <div class="col">
+          <button type="submit">Добавить отчет</button>
+      </div>
+    </div>
+</form>
+</div>
 {% endblock content %}
