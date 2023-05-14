@@ -21,6 +21,7 @@ conn = pyodbc.connect(conn_str, autocommit=True)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
+app.debug = True
 
 def get_connection():
 	connect = pyodbc.connect(conn_str, autocommit=True)
@@ -40,7 +41,7 @@ class Reports(object):
 		self.is_group = None
 		self.date_req = None
 
-	def getGroup():
+	def getGroup(self):
 		cursor = get_connection()
 		cursor.execute("select * from SV..TBP_WEB_REPORTS_LIST where IS_GROUP = 1")
 		columns_name = [column[0] for column in cursor.description]
@@ -70,7 +71,7 @@ class Reports(object):
 			cursor.close()
 			return reports_list
 
-	def getNextReportId():
+	def getNextReportId(self):
 		cursor = get_connection()
 		cursor.execute("select max(ID) as MAX_ID from SV..TBP_WEB_REPORTS_LIST")
 		#columns_name = [column[0] for column in cursor.description]
@@ -81,17 +82,16 @@ class Reports(object):
 		cursor.close()
 		return next_id
 
-	def addReport(visible, isgroup, date_req, parent_id=None, name=None, exec_type=None, exec_path=None, method_name=None):
-		nextId = Reports.getNextReportId()
+	def addReport(parent_id, name, visible, exec_type, exec_path, method_name, isgroup, date_req):
+		nextId = Reports.getNextReportId(self=None)
 		cursor = get_connection()
 		try:
-			print(f"insert into SV..TBP_WEB_REPORTS_LIST(ID, PARENT_ID, NAME, VISIBLE, DATE_ADD, EXEC_TYPE, EXEC_PATH, METHOD_NAME, IS_GROUP, DATE_REQ)"
-		                   f" VALUES ({nextId},{parent_id}, '{name}', {visible}, getdate(),'{exec_type}','{exec_path}','{method_name}',{isgroup},{date_req})")
-
-			#cursor.commit()
+			cursor.execute(f"insert into SV..TBP_WEB_REPORTS_LIST(ID, PARENT_ID, NAME, VISIBLE, DATE_ADD, EXEC_TYPE, EXEC_PATH, METHOD_NAME, IS_GROUP, DATE_REQ)"
+		          f" VALUES ({nextId},{parent_id}, '{name}', {visible}, getdate(),'{exec_type}','{exec_path}','{method_name}',{isgroup},{date_req})")
 		except Exception as e:
-			#cursor.rollback()
+			cursor.rollback()
 			return e
+		cursor.commit()
 		cursor.close()
 		return True
 
@@ -132,8 +132,9 @@ class User(object):
 					session['FullName'] = item['FULL_NAME']
 					session['GroupCode'] = item['GROUP_CODE']
 					session['UserActive'] = item['USER_ACTIVE']
-			return True
 			print(session)
+			return True
+
 
 	def logout(self):
 		session.pop('logged_in', False)
@@ -164,30 +165,33 @@ def form_authorization():
 
 
 @app.route('/admin', methods = ['GET', 'POST'])
-def report_add():
+def report_add(self=None):
 	if request.method == 'GET':
 		if session.get('logged_in') == True and translit(session.get('UserStatus'), language_code='ru', reversed=True) == 'A':
-			return render_template('reportadd.html', full_name = session.get('FullName'), status = session.get('UserStatus'))
+			group_list = Reports.getGroup(self)
+			report_list = Reports.getList(self)
+			return render_template('manage_reports.html', full_name = session.get('FullName'), status = session.get('UserStatus'), group_list = group_list, report_list=report_list)
 		else:
 			return render_template('noaccess.html', full_name = session.get('FullName'))
 	elif request.method == 'POST':
-		result = Reports.addReport(
-		                  request.form.get('ParentId'),
-		                  request.form.get('ReportName'),
-		                  request.form.get('Visible'),
-		                  request.form.get('ExecType'),
-		                  request.form.get('ExecPath'),
-		                  request.form.get('MethodName'),
-		                  request.form.get('DateReq')
-		                  )
+		result = Reports.addReport(request.form.get('ParentId'),
+								   request.form.get('ReportName'),
+								   request.form.get('Visible'),
+								   request.form.get('ExecType'),
+								   request.form.get('ExecPath'),
+								   request.form.get('MethodName'),
+								   0,
+								   request.form.get('DateReq')
+								   )
 		print(result)
+	return "Отчет успешно добавлен!"
 
 
 
 @app.route('/index', methods=['GET','POST'])
-def index():
+def index(self=None):
 	if session.get('logged_in') == True:
-		reports_group = Reports.getGroup()
+		reports_group = Reports.getGroup(self)
 		reports_list = Reports.getList()
 		return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = session.get('FullName'))
 	else:
@@ -293,4 +297,4 @@ def getDoubleConnection():
 		abort(501)
 
 if __name__ == '__main__':
-	run()
+	app.run(debug=True, port=5000)

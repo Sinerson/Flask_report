@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container text-center">
 <br>
-    <div class="container-fluid row" style="width: auto; text-align: center">
+    <div class="container-fluid row" style="width: auto; text-align: left">
         <h4>
             <b>
                 Добавление нового отчета в базу
@@ -14,10 +14,14 @@
 <form method="POST">
   <div class="container-fluid row" style="width: auto; text-align: end">
       <div class="col">
-        <label for="ParentId"><b>ID группы отчетов</b></label>
+        <label for="ParentId"><b>Группа отчетов</b></label>
       </div>
       <div class="col" style="width: auto; text-align: center">
-        <input type="number" placeholder="" name="ParentId" required><br>
+        <select name="ParentId" id = "group_id"><br>
+            {% for item in group_list %}
+            <option value = "{{ item['ID'] }}">{{ item['NAME'] }}</option>
+            {% endfor %}
+        </select>
       </div>
   </div>
   <div class="container-fluid row" style="width: auto; text-align: end">
@@ -77,6 +81,35 @@
     <div class="container-fluid row" style="width: auto; text-align: center">
       <div class="col">
           <button type="submit">Добавить отчет</button>
+      </div>
+    </div>
+</form>
+<br>
+<br>
+    <div class="container-fluid row" style="width: auto; text-align: left">
+        <h4>
+            <b>
+                Удаление отчета
+            </b>
+        </h4>
+    </div>
+<hr>
+<form method="POST">
+  <div class="container-fluid row" style="width: auto; text-align: end">
+      <div class="col">
+        <label for="ReportToDelete"><b>Отчет для удаления</b></label>
+      </div>
+      <div class="col" style="width: auto; text-align: center">
+        <select name="ReportToDelete" id = "deletable"><br>
+            {% for item in report_list %}
+            <option value = "{{ item['ID'] }}">{{ item['NAME'] }}</option>
+            {% endfor %}
+        </select>
+      </div>
+  </div>
+<div class="container-fluid row" style="width: auto; text-align: center">
+      <div class="col">
+          <button type="submit">Удалить отчет</button>
       </div>
     </div>
 </form>
