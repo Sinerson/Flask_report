@@ -1,7 +1,5 @@
 import datetime, os
 from datetime import datetime, timedelta
-import json
-from json import *
 import werkzeug.exceptions
 from flask import Flask, render_template, request, url_for, redirect, flash, make_response, session, g, send_file
 from werkzeug.exceptions import abort
@@ -11,8 +9,7 @@ import pandas as pd
 import numpy as np
 import openpyxl
 import xlsxwriter
-from transliterate import translit, get_available_language_codes
-from io import BytesIO
+from transliterate import translit
 from config import DRIVER, SERVER, PORT, USER, PASSW, LANGUAGE, CLIENT_HOST_NAME, CLIENT_HOST_PROC, APPLICATION_NAME, SECRET_KEY
 
 
@@ -78,7 +75,7 @@ class Reports(object):
 		#id = []
 		#for row in cursor.fetchall():
 		#	id.append(dict(zip(columns_name,row)))
-		next_id = cursor.fetchall()[0][0] +1
+		next_id = cursor.fetchall()[0][0] + 1
 		cursor.close()
 		return next_id
 
@@ -150,12 +147,12 @@ def form_authorization():
 		Login = request.form.get('Login')
 		Password = request.form.get('Password')
 		psw_hash = generate_password_hash(Password)
-		user = User.getUser(Login,Password)
-		if not user:
+		web_user = User.getUser(Login,Password)
+		if not web_user:
 			return render_template('auth_bad.html')
 		else:
 			User.login(Login, Password)
-			for item in user:
+			for item in web_user:
 				if item['USER_NAME'] == Login and check_password_hash(psw_hash, item['USER_PASSWORD']) is True:
 					return redirect('/index')
 				else:
@@ -170,7 +167,8 @@ def report_add(self=None):
 		if session.get('logged_in') == True and translit(session.get('UserStatus'), language_code='ru', reversed=True) == 'A':
 			group_list = Reports.getGroup(self)
 			report_list = Reports.getList(self)
-			return render_template('manage_reports.html', full_name = session.get('FullName'), status = session.get('UserStatus'), group_list = group_list, report_list=report_list)
+			return render_template('manage_reports.html', full_name = session.get('FullName'),
+								   status = session.get('UserStatus'), group_list = group_list, report_list=report_list)
 		else:
 			return render_template('noaccess.html', full_name = session.get('FullName'))
 	elif request.method == 'POST':
@@ -193,7 +191,8 @@ def index(self=None):
 	if session.get('logged_in') == True:
 		reports_group = Reports.getGroup(self)
 		reports_list = Reports.getList()
-		return render_template('index.html', reports_list=reports_list, reports_group = reports_group, user_info = session.get('FullName'))
+		return render_template('index.html', reports_list=reports_list, reports_group = reports_group,
+							   user_info = session.get('FullName'))
 	else:
 		return redirect('/')
 
@@ -217,7 +216,8 @@ def getTelegramUsers():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data = query_data, reports_list = Reports.getList(), user_info = session.get('FullName'))#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
+		return render_template('report.html', data = query_data, reports_list = Reports.getList(),
+							   user_info = session.get('FullName'))#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
 	elif request.method == 'POST':
 		nDate = request.form['nDate']
 		kDate = request.form['kDate']
@@ -242,7 +242,8 @@ def getDevicesByAddressList():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data = query_data, reports_list = Reports.getList(), user_info = session.get('FullName'))#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
+		return render_template('report.html', data = query_data, reports_list = Reports.getList(),
+							   user_info = session.get('FullName'))#[{**e, "idx" : i+1} for i, e in enumerate(query_data)])
 	else:
 		abort(501)
 
@@ -270,7 +271,8 @@ def get24TvCharges():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate, user_info = session.get('FullName'))
+		return render_template('report.html', data=query_data, reports_list=Reports.getList(),
+							   nDate = nDate, kDate=kDate, user_info = session.get('FullName'))
 	else:
 		abort(501)
 
@@ -292,7 +294,8 @@ def getDoubleConnection():
 			query_data.append(dict(zip(columns, row)))
 		cursor.close()
 
-		return render_template('report.html', data=query_data, reports_list=Reports.getList(), nDate = nDate, kDate=kDate, user_info = session.get('FullName'))
+		return render_template('report.html', data=query_data, reports_list=Reports.getList(),
+							   nDate = nDate, kDate=kDate, user_info = session.get('FullName'))
 	else:
 		abort(501)
 
